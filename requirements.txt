@@ -1,0 +1,23 @@
+# Deep Reinforcement Learning Trading Agent - Dependencies
+# Python 3.9+ recommended
+
+# Core RL Framework
+stable-baselines3==2.2.1
+gymnasium==0.29.1
+
+# Deep Learning
+torch==2.1.2
+numpy==1.24.3
+
+# Data Processing
+pandas==2.0.3
+ta-lib==0.4.28  # Technical Analysis Library (requires TA-Lib C library installation)
+# Alternative if TA-Lib installation fails: pandas-ta==0.3.14b0
+
+# Visualization & Monitoring
+matplotlib==3.7.2
+tensorboard==2.15.1
+
+# Utilities
+scikit-learn==1.3.0
+tqdm==4.66.1

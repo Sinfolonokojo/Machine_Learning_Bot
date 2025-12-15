@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyTorch
+*.pth
+*.pt
+
+# TensorBoard logs
+logs/
+runs/
+tensorboard_logs/
+
+# Trained models (comment out if you want to track models)
+models/*.zip
+models/checkpoints/*.zip
+models/best/*.zip
+
+# Data files (add your CSV files to .gitignore to avoid committing large files)
+data/*.csv
+data/*.h5
+data/*.parquet
+
+# Temporary files
+*.log
+*.tmp
+temp/
+tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Environment variables
+.env
+.env.local
+
+# Keep directory structure
+!data/.gitkeep
+!models/.gitkeep
+!logs/.gitkeep
