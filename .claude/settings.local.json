@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: DRL Forex Trading Agent\n\nComplete implementation of a low-risk trading agent for prop firm challenges:\n\nFeatures:\n- PPO-based deep reinforcement learning\n- Risk-first reward function (Sortino ratio + drawdown penalties)\n- Safety layer with hard risk guardrails\n- Risk-based position sizing with ATR stop losses\n- Preprocessing pipeline (log returns + normalized indicators)\n- Complete training pipeline with evaluation\n\nComponents:\n- Custom Gymnasium environment (src/environment/trading_env.py)\n- Feature engineering (src/environment/preprocessing.py)\n- Reward calculator (src/utils/reward_calculator.py)\n- Safety layer (src/agents/safety_layer.py)\n- Training script (src/training/train_ppo.py)\n- Data loader (src/utils/data_loader.py)\n\nTechnical Details:\n- Action space: [position_direction, risk_pct]\n- State space: ~25 normalized features\n- Target: EURUSD/GBPUSD on 15-minute candles\n- Daily loss limit: 4% | Max drawdown: 10%\nEOF\n)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)"
     ]
   }
 }

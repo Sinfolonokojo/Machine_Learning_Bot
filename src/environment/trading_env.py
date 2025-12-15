@@ -27,7 +27,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.environment.preprocessing import ForexPreprocessor
-from src.utils.reward_calculator import RewardCalculator
+from src.utils.fear_relief_reward import FearReliefRewardCalculator  # NEW: Fear & Relief reward
 from src.agents.safety_layer import PropFirmSafetyLayer
 
 
@@ -88,8 +88,9 @@ class ForexTradingEnv(gym.Env):
         # Number of features from preprocessed data
         self.n_features = len(self.data.columns)
 
-        # Additional state features: position, unrealized_pnl, time_in_position, drawdown, daily_pnl
-        self.n_state_features = self.n_features + 5
+        # Additional state features: position, unrealized_pnl, time_in_position, drawdown, daily_pnl, rolling_std_dev
+        # NEW: Added rolling_std_dev for Fear & Relief reward function
+        self.n_state_features = self.n_features + 6
 
         # ====================================================================
         # ACTION SPACE
@@ -117,7 +118,13 @@ class ForexTradingEnv(gym.Env):
         # ====================================================================
         # INITIALIZE COMPONENTS
         # ====================================================================
-        self.reward_calculator = RewardCalculator()
+        # NEW: Fear & Relief reward function
+        self.reward_calculator = FearReliefRewardCalculator(
+            max_daily_loss_pct=daily_loss_limit,
+            rolling_window=20,           # 20-period rolling std
+            fear_coefficient=2.0,        # Fear penalty multiplier
+            relief_coefficient=1.5       # Relief reward multiplier
+        )
         self.safety_layer = PropFirmSafetyLayer(
             daily_loss_limit=daily_loss_limit,
             max_drawdown_limit=max_drawdown_limit,
@@ -181,6 +188,9 @@ class ForexTradingEnv(gym.Env):
         # Reset safety layer
         self.safety_layer.reset(self.initial_balance)
 
+        # NEW: Reset Fear & Relief reward calculator
+        self.reward_calculator.reset()
+
         # Get initial observation
         obs = self._get_observation()
 
@@ -204,8 +214,9 @@ class ForexTradingEnv(gym.Env):
             np.clip(self.position, -1.0, 1.0),  # Normalized position size
             self.unrealized_pnl / self.balance if self.balance > 0 else 0.0,  # Unrealized P&L %
             min(self.current_step / 100.0, 1.0),  # Time in episode (normalized)
-            self._calculate_drawdown(),  # Current drawdown %
-            (self.balance - self.daily_start_balance) / self.daily_start_balance  # Daily P&L %
+            self._calculate_drawdown(),  # Current drawdown % (CRITICAL for Fear)
+            (self.balance - self.daily_start_balance) / self.daily_start_balance,  # Daily P&L %
+            self.reward_calculator.get_rolling_std()  # NEW: Rolling volatility (for R_skill)
         ], dtype=np.float32)
 
         # Concatenate features and position state
@@ -361,24 +372,33 @@ class ForexTradingEnv(gym.Env):
         # ====================================================================
         # 6. UPDATE PEAK EQUITY & TRACKING
         # ====================================================================
+        # Store previous equity for log return calculation
+        prev_equity = self.balance if self.current_step == 0 else \
+                     (self.returns_history[-1] + 1.0) * self.daily_start_balance if len(self.returns_history) > 0 else self.initial_balance
+
         if self.equity > self.peak_equity:
             self.peak_equity = self.equity
 
-        # Calculate step return
+        # NEW: Calculate LOG RETURN for Fear & Relief reward
+        # log_return = ln(equity_t / equity_{t-1})
+        if prev_equity > 0 and self.equity > 0:
+            log_return = np.log(self.equity / prev_equity)
+        else:
+            log_return = 0.0
+
+        # Store regular return for history tracking
         step_return_pct = (self.equity / self.daily_start_balance - 1.0)
         self.returns_history.append(step_return_pct)
 
         # ====================================================================
-        # 7. CALCULATE REWARD
+        # 7. CALCULATE REWARD (Fear & Relief)
         # ====================================================================
         current_drawdown = self._calculate_drawdown()
-        step_pnl_pct = (self.equity - self.balance) / self.balance if self.balance > 0 else 0.0
 
+        # NEW: Use Fear & Relief reward function
         reward = self.reward_calculator.calculate_reward(
-            returns_history=np.array(self.returns_history),
-            current_step_pnl_pct=step_pnl_pct,
-            current_drawdown_pct=current_drawdown,
-            position_changed=position_changed
+            log_return=log_return,
+            current_drawdown_pct=current_drawdown
         )
 
         # ====================================================================
