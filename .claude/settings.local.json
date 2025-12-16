@@ -6,7 +6,15 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: DRL Forex Trading Agent\n\nComplete implementation of a low-risk trading agent for prop firm challenges:\n\nFeatures:\n- PPO-based deep reinforcement learning\n- Risk-first reward function (Sortino ratio + drawdown penalties)\n- Safety layer with hard risk guardrails\n- Risk-based position sizing with ATR stop losses\n- Preprocessing pipeline (log returns + normalized indicators)\n- Complete training pipeline with evaluation\n\nComponents:\n- Custom Gymnasium environment (src/environment/trading_env.py)\n- Feature engineering (src/environment/preprocessing.py)\n- Reward calculator (src/utils/reward_calculator.py)\n- Safety layer (src/agents/safety_layer.py)\n- Training script (src/training/train_ppo.py)\n- Data loader (src/utils/data_loader.py)\n\nTechnical Details:\n- Action space: [position_direction, risk_pct]\n- State space: ~25 normalized features\n- Target: EURUSD/GBPUSD on 15-minute candles\n- Daily loss limit: 4% | Max drawdown: 10%\nEOF\n)\")",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nImplement advanced Fear & Relief reward function\n\nAdded sophisticated behavioral economics-based reward system:\n\nMathematical Formula:\nR_t = Utility(R_skill - Fear - Relief - Volatility)\n\nComponents:\n1. R_skill: Risk-adjusted returns (log_return / rolling_std_dev)\n2. Fear: Exponential penalty for approaching daily loss limit\n   - Formula: 2.0 * (current_drawdown / max_daily_loss)^4\n   - Creates \"cliff effect\" as limit approaches\n3. Relief: Reward for drawdown recovery\n   - Formula: 1.5 * (current_drawdown - prev_drawdown)\n   - Encourages careful loss recovery\n4. Volatility: Semi-variance (only penalize negative returns)\n5. Utility: Logarithmic clamp to prevent lucky spikes\n\nChanges:\n- Added fear_relief_reward.py with FearReliefRewardCalculator\n- Updated trading_env.py to use new reward function\n- Expanded observation space to include rolling_std_dev\n- Modified reward calculation to use log returns\n- Added reset() call for reward calculator\n\nBenefits:\n- Agent learns to avoid risk limits (Fear)\n- Incentivizes gradual recovery from losses (Relief)\n- Prevents exploitation of lucky wins (Utility)\n- More robust training signal than simple PnL\nEOF\n)\")",
+      "Bash(python -m venv:*)",
+      "Bash(. venv/Scripts/activate)",
+      "Bash(python -m pip install:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(powershell -Command \"Start-Process ''https://aka.ms/vs/17/release/vc_redist.x64.exe''\")"
     ]
   }
 }
