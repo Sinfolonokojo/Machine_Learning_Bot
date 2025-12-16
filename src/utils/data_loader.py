@@ -118,28 +118,28 @@ class ForexDataLoader:
         # 1. Check minimum rows
         if len(df) < self.min_rows:
             raise ValueError(f"Insufficient data: {len(df)} rows < {self.min_rows} minimum")
-        print(f"✓ Sufficient data: {len(df)} rows")
+        print(f"[OK] Sufficient data: {len(df)} rows")
 
         # 2. Check for missing values
         null_counts = df.isnull().sum()
         if null_counts.any():
-            print(f"✗ WARNING: Missing values detected:\n{null_counts[null_counts > 0]}")
+            print(f"[WARN] Missing values detected:\n{null_counts[null_counts > 0]}")
             warnings.warn("Data contains missing values - will be forward-filled")
         else:
-            print("✓ No missing values")
+            print("[OK] No missing values")
 
         # 3. Check chronological ordering
         if not df.index.is_monotonic_increasing:
             raise ValueError("Data is not chronologically ordered")
-        print("✓ Data is chronologically ordered")
+        print("[OK] Data is chronologically ordered")
 
         # 4. Check for duplicate timestamps
         if df.index.duplicated().any():
             num_duplicates = df.index.duplicated().sum()
-            print(f"✗ WARNING: {num_duplicates} duplicate timestamps found - removing...")
+            print(f"[WARN] {num_duplicates} duplicate timestamps found - removing...")
             df = df[~df.index.duplicated(keep='first')]
         else:
-            print("✓ No duplicate timestamps")
+            print("[OK] No duplicate timestamps")
 
         # 5. Validate OHLC relationships
         invalid_high = (df['high'] < df['low']).sum()
@@ -152,7 +152,7 @@ class ForexDataLoader:
                         invalid_open_high + invalid_open_low)
 
         if total_invalid > 0:
-            print(f"✗ WARNING: {total_invalid} rows with invalid OHLC relationships")
+            print(f"[WARN] {total_invalid} rows with invalid OHLC relationships")
             if invalid_high > 0:
                 print(f"  - {invalid_high} rows where high < low")
             if invalid_close_high > 0:
@@ -160,21 +160,21 @@ class ForexDataLoader:
             if invalid_close_low > 0:
                 print(f"  - {invalid_close_low} rows where close < low")
         else:
-            print("✓ Valid OHLC relationships")
+            print("[OK] Valid OHLC relationships")
 
         # 6. Check for zero or negative prices
         zero_prices = (df[['open', 'high', 'low', 'close']] <= 0).any(axis=1).sum()
         if zero_prices > 0:
             raise ValueError(f"{zero_prices} rows contain zero or negative prices")
-        print("✓ All prices are positive")
+        print("[OK] All prices are positive")
 
         # 7. Check for extreme price changes (potential data errors)
         returns = df['close'].pct_change()
         extreme_returns = (np.abs(returns) > 0.1).sum()  # 10% change in one candle
         if extreme_returns > 0:
-            print(f"✗ WARNING: {extreme_returns} candles with >10% price change (possible data errors)")
+            print(f"[WARN] {extreme_returns} candles with >10% price change (possible data errors)")
         else:
-            print("✓ No extreme price movements detected")
+            print("[OK] No extreme price movements detected")
 
         print("\nValidation complete!\n")
 

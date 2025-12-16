@@ -14,7 +14,8 @@
       "Bash(pip install:*)",
       "Bash(python:*)",
       "Bash(pip uninstall:*)",
-      "Bash(powershell -Command \"Start-Process ''https://aka.ms/vs/17/release/vc_redist.x64.exe''\")"
+      "Bash(powershell -Command \"Start-Process ''https://aka.ms/vs/17/release/vc_redist.x64.exe''\")",
+      "Bash(git commit:*)"
     ]
   }
 }
